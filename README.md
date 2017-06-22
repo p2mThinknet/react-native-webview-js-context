@@ -1,88 +1,157 @@
 # react-native-webview-js-context [![npm version](https://badge.fury.io/js/react-native-webview-js-context.svg)](http://badge.fury.io/js/react-native-webview-js-context)
 
-Interactive JavaScript between a UIWebView and React Native.
+Interactive JavaScript between a UIWebView and React Native.  
 
-**Example:** Google Charts used to render a chart (base64 encoded image) in a `<Image />` component
-
-<img width="375" src="http://shayne.github.io/react-native-webview-js-context/readme-files/google-charts-screenshot.png?999" />
 
 ```javascript
-const GC_HTML = `
-  <html>
-    <head>
-      <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-      <script type="text/javascript">
-        google.load('visualization', '1.0', {'packages':['corechart']});
-        google.setOnLoadCallback(resolve); /* <--- resolve() is called by RNWebViewJSContext */
-      </script>
-    </head>
-    <body><div id="chart_div"></div></body>
-  </html>`;
+import React, {Component} from 'react';
+import {
+  AppRegistry,
+  StyleSheet,
+  NativeModules,
+  Text,
+  View,
+  Platform,
+  TouchableHighlight,
+  Image
+} from 'react-native';
 
-const CHART_JS = `
-  var data = new google.visualization.DataTable();
-  data.addColumn('date', 'Day');
-  data.addColumn('number', 'Weight');
-  data.addColumn({ type: 'string', role: 'annotation' });
-  data.addRows([
-      [new Date(2015, 2, 1), 150, '150'],
-      [new Date(2015, 2, 2), 152, null],
-      [new Date(2015, 2, 3), 146, '146'],
-      [new Date(2015, 2, 4), 150, null],
-      [new Date(2015, 2, 5), 157, '157'],
-      [new Date(2015, 2, 06), 147, null],
-      [new Date(2015, 2, 07), 147.5, '147'],
-  ]);
+import ReactDOMServer from 'react-dom/server';
 
-  var options = { enableInteractivity: false,
-                  legend: {position: 'none'},
-                  lineWidth: 3, width:750, height:420,
-                  pointShape: 'circle', pointSize: 8,
-                  chartArea: { left: 30, width: 690 }, areaOpacity: 0.07,
-                  colors: ['#e14c4d'], backgroundColor: { 'fill': '#34343f' },
-                  annotations: {
-                    textStyle: { fontSize: 26, bold: true, color: '#bbbbbd', auroColor: '#3f3f3f' },
-                  },
-                  hAxis: {
-                    format: 'MMM d',
-                    textStyle: {color: '#bbbbbd', fontSize: 16,}, gridlines: { color: 'transparent' },
-                  },
-                  vAxis: { gridlines: { count: 3, color: '#3f414f' } },
-                };
 
-  var chart = new google.visualization.AreaChart(document.getElementById('chart_div'));
-  chart.draw(data, options);
+const ROWCOUNT_JS = `
+         //1 in = 96 px
+         //页边距左右各给2.54cm = (2.54 * 0.393700787) * 96(px)
+         //A4纸张宽度 (8.3 in * 96)px
+         function setDivWidthForA4(divClass) {
+            var divComponent = document.getElementsByClassName(divClass)[0];
+            var divWidth = (8.3 - 2 * 2.54 * 0.393700787) * 96;
+            divComponent.style.width = divWidth + 'px';
+         };
 
-  resolve(chart.getImageURI()); /* <--- resolve() is called by RNWebViewJSContext */`;
+         /*function getParagraphRowCount(paragraph) {
+
+         }*/
+
+         function getRowCountFromDiv(divClass, paragraphSpace, rowHeight) {
+            var divComponent = document.getElementsByClassName(divClass)[0];        
+            setDivWidthForA4(divClass);
+            var divWidth = divComponent.offsetWidth;
+            var divHeight = divComponent.offsetHeight;
+            var paragraphCount = divComponent.getElementsByTagName("p").length;
+            var rowCount = parseInt((divHeight - (paragraphCount - 1) * paragraphSpace) / (rowHeight) + 0.5);
+            return rowCount;
+         };
+         var rows = document.getElementsByClassName("scope")[0].getElementsByTagName("p").length;
+         var num = getRowCountFromDiv("scope", 28, 20, 20);
+         resolve(num + "行") /* <--- resolve() is called by RNWebViewJSContext */`;
 
 import WebViewJSContext from 'react-native-webview-js-context';
 
-class RNCharts {
-  state: { imageUri: null };
+class Greeting extends React.Component {
+  constructor() {
+    super();
+  }
 
-  componentWillMount() {
-    WebViewJSContext.createWithHTML(GC_HTML)
+  render() {
+    return (
+        <div className="scope">
+          <p>
+            <span >
+                <span>时间</span>
+            </span>
+          <span className="text_u">2016 </span>
+          <span >年</span>
+          <span className="text_u"><span >07 </span></span>
+          <span ><span>月</span></span>
+          <span className="text_u"><span >01 </span></span>
+          <span ><span>日</span></span>
+          <span className="text_u"><span >11 </span></span>
+          <span ><span>时</span></span>
+          <span className="text_u"><span >15 </span></span>
+          <span ><span>分至</span></span>
+          <span className="text_u"><span >11 </span></span>
+          <span ><span>时</span></span>
+          <span className="text_u"><span >30 </span></span>
+          <span ><span>分</span>
+                &nbsp;&nbsp;&nbsp;&nbsp;<span>第</span> &nbsp;1次询问</span>        
+        </p>
+        <p>
+          <span >地点</span>
+          <span className="text_u"><span >&nbsp;G6京藏高速公路叶盛收费站&nbsp;</span>
+            </span>       
+        </p>
+        <p>
+          <span ><span>询问人</span></span>
+          <span className="text_u">
+                  <span >&nbsp;<span>管仲</span>&nbsp;<span>公孙鞅</span>&nbsp;</span>
+              </span>
+          <span ><span>记录人</span></span>
+          <span className="text_u"><span >
+                  &nbsp;
+                  <span>韩非</span> &nbsp;</span>
+              </span>       
+        </p>
+      </div>
+    );
+  }
+}
+
+export default class RNPrintExample extends Component {
+
+  /*
+  divComponent: Rect组件
+  paragraphSpace: 段间距(px)
+  rowHeight: 行高(px)
+  */
+  getRowCountFromDiv(divComponent, paragraphSpace, rowHeight) {
+    let divHTMLStr = `<html>
+                        <head>                         
+                          <script type="text/javascript">        
+                              window.onload = resolve;
+                          </script>
+                        </head>
+                        <body>`;
+    divHTMLStr += ReactDOMServer.renderToString(React.createElement(divComponent));
+    divHTMLStr += `</body>
+                    </html>`;
+    WebViewJSContext
+      .createWithHTML(divHTMLStr)
       .then(context => {
         this.ctx = context;
-        this.loadChart();
+        this.caculateRowCount();
       });
   }
 
   componentWillUnmount() {
-    this.ctx && this.ctx.destroy();
-  },
+    this.ctx && this
+      .ctx
+      .destroy();
+  }
 
   render() {
-    return this.state.imageUri ?
-      <Image style={{ width: 375, height: 300 }} source={{ uri: this.state.imageUri }} />
-      : <View />;
+    return (
+      <View>
+        <TouchableHighlight
+          onPress={() => {
+          this.getRowCountFromDiv(Greeting, 66, 20);
+        }}>
+          <Text>计算行数</Text>
+        </TouchableHighlight>
+      </View>
+    )
   }
 
-  async loadChart() {
-    var imageUri = await this.ctx.evaluateScript(CHART_JS);
-    this.setState({ imageUri });
+  async caculateRowCount() {
+    var rowCount = await this.ctx.evaluateScript(ROWCOUNT_JS);
+    alert(rowCount);
+    this.ctx && this
+      .ctx
+      .destroy();
   }
 }
+
+AppRegistry.registerComponent('RNPrintExample', () => RNPrintExample);
 ```
 
 ## Usage
@@ -119,7 +188,7 @@ dependencies {
 }
 ```
 
-* register module (in MainActivity.java)
+* register module (in MainApplication.java)
 
 ```java
 ...
@@ -129,25 +198,14 @@ import com.shaynesweeney.react_native_webview_js_context.RNWebViewJSContextPacka
 public class MainActivity extends Activity implements DefaultHardwareBackBtnHandler {
 	...
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        mReactRootView = new ReactRootView(this);
-
-        mReactInstanceManager = ReactInstanceManager.builder()
-                .setApplication(getApplication())
-                .setBundleAssetName("index.android.bundle")
-                .setJSMainModuleName("index.android")
-                .addPackage(new MainReactPackage())
-                .addPackage(new RNWebViewJSContextPackage()) // <- ADD HERE
-                .setUseDeveloperSupport(BuildConfig.DEBUG)
-                .setInitialLifecycleState(LifecycleState.RESUMED)
-                .build();
-
-        mReactRootView.startReactApplication(mReactInstanceManager, "YourProject", null);
-
-        setContentView(mReactRootView);
-    }
+  @Override
+  protected List<ReactPackage> getPackages() {
+    return Arrays.<ReactPackage>asList(
+        new MainReactPackage(),
+          new RNPrintPackage(),
+          new RNHTMLtoPDFPackage(),
+          new RNWebViewJSContextPackage()   //<----- add here
+    );
+  }
 }
 ```
-
